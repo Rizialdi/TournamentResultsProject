@@ -13,16 +13,30 @@ def connect():
 
 def deleteMatches():
     """Remove all the match records from the database."""
-    DELETE FROM matches;
-
-
+    sql_stat = "DELETE FROM matches;"
+    DB = connect()
+    cursor = DB.cursor()
+    cursor.execute(sql_stat)
+    cursor.close()
+    DB.close()
+    
 def deletePlayers():
     """Remove all the player records from the database."""
-    DELETE FROM players;
+    sql_stat = "DELETE FROM players;"
+    DB = connect()
+    cursor = DB.cursor()
+    cursor.execute(sql_stat)
+    cursor.close()
+    DB.close()
 
 def countPlayers():
     """Returns the number of players currently registered."""
-
+    sql_stat = "SELECT count(*) FROM players;"
+    DB = connect()
+    cursor = DB.cursor()
+    cursor.execute(sql_stat)
+    cursor.close()
+    DB.close()
 
 def registerPlayer(name):
     """Adds a player to the tournament database.
@@ -33,7 +47,13 @@ def registerPlayer(name):
     Args:
       name: the player's full name (need not be unique).
     """
-
+    sql_stat = "INSERT INTO players (name) VALUES (name);"
+    DB = connect()
+    cursor = DB.cursor()
+    cursor.execute(sql_stat)
+    DB.commit()
+    cursor.close()
+    DB.close()
 
 
 
@@ -50,7 +70,8 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-
+    sql = "SELECT players.id, players.name, sum(case when matches.winner = players.id then 1 else 0 end) wins,"
+          "sum(case when matches.loser = players.id then 1 else 0 end) loses FROM matches, players GROUP BY players.id ORDER BY wins DESC;"
 
 def reportMatch(winner, loser):
     """Records the outcome of a single match between two players.
