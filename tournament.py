@@ -6,10 +6,13 @@
 import psycopg2
 
 
-def connect():
-    """Connect to the PostgreSQL database.  Returns a database connection."""
-    return psycopg2.connect("dbname=tournament")
-
+def connect(database_name="tournament"):
+    try:
+        db = psycopg2.connect("dbname={}".format(database_name))
+        cursor = db.cursor()
+        return db, cursor
+    except:
+        print("<error message>")
 
 def deleteMatches():
     """Remove all the match records from the database."""
@@ -22,19 +25,19 @@ def deleteMatches():
     
 def deletePlayers():
     """Remove all the player records from the database."""
-    sql_stat = "DELETE FROM players;"
-    DB = connect()
-    cursor = DB.cursor()
+    sql_stat = "TRUNCATE players CASCADE;"
+    db, cursor = connect()
     cursor.execute(sql_stat)
     cursor.close()
-    DB.close()
+    db.close()
 
 def countPlayers():
     """Returns the number of players currently registered."""
     sql_stat = "SELECT count(*) FROM players;"
-    DB = connect()
-    cursor = DB.cursor()
+    db, cursor = connect()
     cursor.execute(sql_stat)
+    num = cursor.fetchone()[0]
+    return num 
     cursor.close()
     DB.close()
 
@@ -47,13 +50,14 @@ def registerPlayer(name):
     Args:
       name: the player's full name (need not be unique).
     """
-    sql_stat = "INSERT INTO players (name) VALUES (name);"
-    DB = connect()
-    cursor = DB.cursor()
-    cursor.execute(sql_stat)
-    DB.commit()
-    cursor.close()
-    DB.close()
+    db, cursor = connect()
+
+    sql_stat = "INSERT INTO players (name) VALUES (%s);"
+    parameter = (name,)
+    cursor.execute(query, parameter)
+
+    db.commit()
+    db.close()
 
 
 
@@ -80,7 +84,13 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
- 
+    sql_stat = "INSERT INTO matches (winner, loser) VALUES (%s, %s);"
+    db, cursor = connect()
+    parameter = (winner, loser)
+    cursor.execute(sql_stat, parameter)
+    DB.commit()
+    cursor.close()
+    DB.close() 
  
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
