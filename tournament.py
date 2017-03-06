@@ -14,20 +14,22 @@ def connect(database_name="tournament"):
     except:
         print("<error message>")
 
+
 def deleteMatches():
     """Remove all the match records from the database."""
     sql_stat = "DELETE FROM matches;"
-    DB = connect()
-    cursor = DB.cursor()
-    cursor.execute(sql_stat)
-    cursor.close()
-    DB.close()
-    
-def deletePlayers():
-    """Remove all the player records from the database."""
-    sql_stat = "TRUNCATE players CASCADE;"
     db, cursor = connect()
     cursor.execute(sql_stat)
+    cursor.close()
+    db.close()
+
+def deletePlayers():
+    """Remove all the player records from the database."""
+   #sql_stat = "TRUNCATE players CASCADE;"
+    sql_stat = "DELETE FROM players;"
+    db, cursor = connect()
+    cursor.execute(sql_stat)
+    db.commit()
     cursor.close()
     db.close()
 
@@ -37,9 +39,10 @@ def countPlayers():
     db, cursor = connect()
     cursor.execute(sql_stat)
     num = cursor.fetchone()[0]
-    return num 
     cursor.close()
-    DB.close()
+    db.close()
+    return num
+
 
 def registerPlayer(name):
     """Adds a player to the tournament database.
@@ -51,11 +54,9 @@ def registerPlayer(name):
       name: the player's full name (need not be unique).
     """
     db, cursor = connect()
-
     sql_stat = "INSERT INTO players (name) VALUES (%s);"
     parameter = (name,)
-    cursor.execute(query, parameter)
-
+    cursor.execute(sql_stat, parameter)
     db.commit()
     db.close()
 
@@ -74,8 +75,14 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-    sql = "SELECT players.id, players.name, sum(case when matches.winner = players.id then 1 else 0 end) wins,"
-          "sum(case when matches.loser = players.id then 1 else 0 end) loses FROM matches, players GROUP BY players.id ORDER BY wins DESC;"
+    sql_stat = "SELECT * FROM v_wl"
+    db, cursor = connect()
+    cursor.execute(sql_stat)
+    num = cursor.fetchall()
+    cursor.close()
+    db.close()
+    return num
+
 
 def reportMatch(winner, loser):
     """Records the outcome of a single match between two players.
@@ -88,9 +95,9 @@ def reportMatch(winner, loser):
     db, cursor = connect()
     parameter = (winner, loser)
     cursor.execute(sql_stat, parameter)
-    DB.commit()
+    db.commit()
     cursor.close()
-    DB.close() 
+    db.close() 
  
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
