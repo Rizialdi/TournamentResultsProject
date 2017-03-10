@@ -17,17 +17,19 @@ def connect(database_name="tournament"):
 
 def deleteMatches():
     """Remove all the match records from the database."""
-    sql_stat = "DELETE FROM matches;"
+    sql_stat = "delete from matches;"
     db, cursor = connect()
     cursor.execute(sql_stat)
     cursor.close()
     db.close()
 
+
 def deletePlayers():
     """Remove all the player records from the database."""
    #sql_stat = "TRUNCATE players CASCADE;"
-    sql_stat = "DELETE FROM players;"
+    sql_stat = "TRUNCATE players CASCADE;"
     db, cursor = connect()
+    deleteMatches()
     cursor.execute(sql_stat)
     db.commit()
     cursor.close()
@@ -42,6 +44,7 @@ def countPlayers():
     cursor.close()
     db.close()
     return num
+
 
 
 def registerPlayer(name):
@@ -61,7 +64,6 @@ def registerPlayer(name):
     db.close()
 
 
-
 def playerStandings():
     """Returns a list of the players and their win records, sorted by wins.
 
@@ -75,7 +77,7 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-    sql_stat = "SELECT * FROM v_wl"
+    sql_stat = "SELECT * FROM v_tuple"
     db, cursor = connect()
     cursor.execute(sql_stat)
     num = cursor.fetchall()
@@ -98,6 +100,7 @@ def reportMatch(winner, loser):
     db.commit()
     cursor.close()
     db.close() 
+
  
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
